@@ -72,6 +72,10 @@ cd $BUILD_DIR/libcairo/cairo-1.12.16
 CFLAGS='-fPIC -Wall -g -O2' CXXFLAGS='-fPIC -Wall -g -O2' png_CFLAGS='-fPIC -Wall -g -O2' ./autogen.sh --with-pic --enable-static --disable-shared --prefix=$VENDORED_LIBCAIRO
 make
 make install
+export PATH="$VENDORED_LIBCAIRO/bin:$PATH"
+export LD_RUN_PATH="$VENDORED_LIBCAIRO/lib:$LD_RUN_PATH"
+export LD_LIBRARY_PATH="$LD_RUN_PATH"
+export PKG_CONFIG_PATH="$VENDORED_LIBCAIRO/lib/pkgconfig:$PKG_CONFIG_PATH"
 cd ../..
 
 echo "-----> Building runtime environment"
