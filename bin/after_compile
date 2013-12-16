@@ -1,9 +1,9 @@
-export LD_RUN_PATH="/app/vendor/libcairo/lib:$LD_RUN_PATH"
-export LD_LIBRARY_PATH="/app/vendor/libcairo/lib:$LD_LIBRARY_PATH"
-export PKG_CONFIG_PATH="/app/vendor/libcairo/lib/pkgconfig:$PKG_CONFIG_PATH"
+export LD_RUN_PATH="/app/vendor/libpixman/lib:/app/vendor/libcairo/lib:$LD_RUN_PATH"
+export LD_LIBRARY_PATH="/app/vendor/libpixman/lib:/app/vendor/libcairo/lib:$LD_LIBRARY_PATH"
+export PKG_CONFIG_PATH="/app/vendor/libpixman/lib/pkgconfig:/app/vendor/libcairo/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 echo "-----> /app/vendor contents:"
 ls -a /app/vendor
 
-echo "-----> /app/vendor/libcairo/lib contents:"
-ls -a /app/vendor/libcairo/lib
+echo "-----> /app/vendor/libcairo/lib and /app/vendor/libpixman contents:"
+ls -a /app/vendor/libcairo /app/vendor/libpixman
