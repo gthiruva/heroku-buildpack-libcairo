@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# bin/release <build-dir>
+
+cat <<EOF
+---
+config_vars:
+  PATH: /app/vendor/libcairo/bin:bin:/usr/local/bin:/usr/bin:/bin
+  LD_LIBRARY_PATH: /app/vendor/libcairo/lib:$LD_LIBRARY_PATH
+  PKG_CONFIG_PATH: /app/vendor/libcairo/lib/pkgconfig:$PKG_CONFIG_PATH
+EOF

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# bin/compile <build-dir> <cache-dir>
+
+# fail fast
+set -e
+
+# debug
+# set -x
+echo "-----> We are in '$PWD' with contents:"
+ls -a
+echo "-----> Present PATH's:"
+echo "PATH: '$PATH'"
+echo "LD_LIBRARY_PATH: '$LD_LIBRARY_PATH'"
+echo "PKG_CONFIG_PATH: '$PKG_CONFIG_PATH'"
+
+# clean up leaking environment
+unset GIT_DIR
+
+# config
+export PKG_CONFIG_PATH=/usr/lib64/pkgconfig:/opt/local/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+
+if [[ "Darwin" == "$(uname)" ]]
+then
+    VENDORED_LIBCAIRO="$HOME/Code/heroku-buildpack-libcairo/vendor/libcairo" # Just for my local laptop testing
+else
+    VENDORED_LIBCAIRO="/app/vendor/libcairo"
+fi
+
+# parse and derive params
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+function tar_download() {
+  url="$1"
+  location="$2"
+
+  mkdir -p $location
+  curl $url -s -o - | tar xJf - -C $location
+}
+
+#Building libcairo
+echo "-----> Building libcairo ... BUILD_DIR: $BUILD_DIR // CACHE_DIR: $CACHE_DIR // PWD: $PWD"
+tar_download "http://cairographics.org/releases/cairo-1.12.16.tar.xz" $BUILD_DIR/libcairo
+
+cd $BUILD_DIR/libcairo/cairo-1.12.16
+CFLAGS='-fPIC -Wall -g -O2' CXXFLAGS='-fPIC -Wall -g -O2' png_CFLAGS='-fPIC -Wall -g -O2' ./configure --with-pic --enable-static --disable-shared --prefix=$VENDORED_LIBCAIRO
+make
+make install
+cd ../..
+
+echo "-----> Building runtime environment"
+mkdir -p .profile.d
+echo "export PATH=\"\$HOME/vendor/libcairo/bin:\$PATH\"" > .profile.d/libcairo.sh
+echo "export LD_LIBRARY_PATH=\"\$HOME/vendor/libcairo/lib:\$LD_LIBRARY_PATH\"" > .profile.d/libcairo.sh
+echo "export PKG_CONFIG_PATH=\"\$HOME/vendor/libcairo/lib/pkgconfig:\$PKG_CONFIG_PATH\"" >> .profile.d/libcairo.sh
