@@ -24,6 +24,26 @@ unset GIT_DIR
 # config
 export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/opt/local/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
 
+### libpixman is required for libcairo
+if [[ "Darwin" == "$(uname)" ]]
+then
+    VENDORED_LIBPIXMAN="$HOME/Code/heroku-buildpack-libpixman/vendor/libpixman" # Just for my local laptop testing
+else
+    VENDORED_LIBPIXMAN="/app/vendor/libpixman"
+fi
+
+git clone git://anongit.freedesktop.org/git/pixman
+cd pixman
+autoreconf -v --install
+./configure --prefix=$VENDORED_LIBPIXMAN
+make
+make install
+export LD_RUN_PATH="$VENDORED_LIBPIXMAN/lib:/usr/local/lib:/usr/lib:/lib:$LD_RUN_PATH"
+export LD_LIBRARY_PATH="$LD_RUN_PATH"
+export PKG_CONFIG_PATH="$VENDORED_LIBPIXMAN/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+cd ..
+### End libpixman stuff
+
 if [[ "Darwin" == "$(uname)" ]]
 then
     VENDORED_LIBCAIRO="$HOME/Code/heroku-buildpack-libcairo/vendor/libcairo" # Just for my local laptop testing
@@ -45,10 +65,11 @@ function tar_download() {
 
 #Building libcairo
 echo "-----> Building libcairo ... BUILD_DIR: $BUILD_DIR // CACHE_DIR: $CACHE_DIR // PWD: $PWD"
-tar_download "http://cairographics.org/releases/cairo-1.12.16.tar.xz" $BUILD_DIR/libcairo
-
+#tar_download "http://cairographics.org/releases/cairo-1.12.16.tar.xz" $BUILD_DIR/libcairo
+git clone git://anongit.freedesktop.org/git/cairo $BUILD_DIR/libcairo/cairo-1.12.16
 cd $BUILD_DIR/libcairo/cairo-1.12.16
-CFLAGS='-fPIC -Wall -g -O2' CXXFLAGS='-fPIC -Wall -g -O2' png_CFLAGS='-fPIC -Wall -g -O2' ./configure --with-pic --enable-static --disable-shared --prefix=$VENDORED_LIBCAIRO
+#./autogen.sh --prefix=$VENDORED_LIBCAIRO
+CFLAGS='-fPIC -Wall -g -O2' CXXFLAGS='-fPIC -Wall -g -O2' png_CFLAGS='-fPIC -Wall -g -O2' ./autogen.sh --with-pic --enable-static --disable-shared --prefix=$VENDORED_LIBCAIRO
 make
 make install
 cd ../..
