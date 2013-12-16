@@ -36,7 +36,7 @@ git clone git://anongit.freedesktop.org/git/pixman
 cd pixman
 autoreconf -v --install
 ./configure --prefix=$VENDORED_LIBPIXMAN
-make
+make -j5
 make install
 export LD_RUN_PATH="$VENDORED_LIBPIXMAN/lib:/usr/local/lib:/usr/lib:/lib:$LD_RUN_PATH"
 export LD_LIBRARY_PATH="$LD_RUN_PATH"
@@ -70,7 +70,7 @@ git clone git://anongit.freedesktop.org/git/cairo $BUILD_DIR/libcairo/cairo-1.12
 cd $BUILD_DIR/libcairo/cairo-1.12.16
 #./autogen.sh --prefix=$VENDORED_LIBCAIRO
 CFLAGS='-fPIC -Wall -g -O2' CXXFLAGS='-fPIC -Wall -g -O2' png_CFLAGS='-fPIC -Wall -g -O2' ./autogen.sh --with-pic --enable-static --disable-shared --prefix=$VENDORED_LIBCAIRO
-make
+make -j5
 make install
 export PATH="$VENDORED_LIBCAIRO/bin:$PATH"
 export LD_RUN_PATH="$VENDORED_LIBCAIRO/lib:$LD_RUN_PATH"
