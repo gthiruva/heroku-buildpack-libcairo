@@ -73,6 +73,7 @@ mkdir -p .profile.d
 echo "export VENDORED_LIBPIXMAN=\"$VENDORED_LIBPIXMAN\"" > .profile.d/libcairo.sh
 echo "export VENDORED_LIBCAIRO=\"$VENDORED_LIBCAIRO\"" >> .profile.d/libcairo.sh
 echo "export PATH=\"\$VENDORED_LIBCAIRO/bin:\$PATH\"" >> .profile.d/libcairo.sh
-echo "export LD_RUN_PATH=\"\$VENDORED_LIBPIXMAN/lib:\$VENDORED_LIBCAIRO/lib:\$LD_RUN_PATH\"" > .profile.d/libcairo.sh
-echo "export LD_LIBRARY_PATH=\"\$VENDORED_LIBPIXMAN/lib:\$VENDORED_LIBCAIRO/lib:\$LD_LIBRARY_PATH\"" > .profile.d/libcairo.sh
+echo "export LD_RUN_PATH=\"\$VENDORED_LIBPIXMAN/lib:\$VENDORED_LIBCAIRO/lib:\$LD_RUN_PATH\"" >> .profile.d/libcairo.sh
+echo "export LD_LIBRARY_PATH=\"\$VENDORED_LIBPIXMAN/lib:\$VENDORED_LIBCAIRO/lib:\$LD_LIBRARY_PATH\"" >> .profile.d/libcairo.sh
 echo "export PKG_CONFIG_PATH=\"\$VENDORED_LIBPIXMAN/lib/pkgconfig:\$VENDORED_LIBCAIRO/lib/pkgconfig:\$PKG_CONFIG_PATH\"" >> .profile.d/libcairo.sh
+cat .profile.d/libcairo.sh
