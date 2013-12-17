@@ -68,7 +68,7 @@ export LD_LIBRARY_PATH="$LD_RUN_PATH"
 export PKG_CONFIG_PATH="$VENDORED_LIBCAIRO/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 echo "-----> Building runtime environment"
-cd /app
+cd $BUILD_DIR
 mkdir -p .profile.d
 echo "export VENDORED_LIBPIXMAN=\"$VENDORED_LIBPIXMAN\"" > .profile.d/libcairo.sh
 echo "export VENDORED_LIBCAIRO=\"$VENDORED_LIBCAIRO\"" >> .profile.d/libcairo.sh
