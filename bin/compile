@@ -24,9 +24,6 @@ echo "PKG_CONFIG_PATH: '$PKG_CONFIG_PATH'"
 # clean up leaking environment
 unset GIT_DIR
 
-# config
-export PKG_CONFIG_PATH="/usr/lib64/pkgconfig:/opt/local/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:$PKG_CONFIG_PATH"
-
 ### libpixman is required for libcairo
 if [[ "Darwin" == "$(uname)" ]]
 then
@@ -35,16 +32,32 @@ else
     VENDORED_LIBPIXMAN="/app/vendor/libpixman"
 fi
 
-cd $BUILD_DIR
-git clone git://anongit.freedesktop.org/git/pixman
-cd pixman
-autoreconf -v --install
+# fetch and cache the source tar ball
+LIBPIXMAN_PACKAGE="http://ftp.ucsb.edu/pub/mirrors/linux/gentoo/distfiles/pixman-0.32.4.tar.bz2"
+LIBPIXMAN_PACKAGE_ETAG=$(curl -s --head "$LIBPIXMAN_PACKAGE" | grep -Ei '^etag' | sed -r 's/^etag|[^a-zA-Z0-9]+//gi')
+LIBPIXMAN_CACHE="$CACHE_DIR/libpixman_$LIBPIXMAN_PACKAGE_ETAG";
+LIBPIXMAN_DIRNAME="pixman-0.32.4"
+
+if [ -d "$LIBPIXMAN_CACHE" ]; then
+  echo "-----> Reusing cached libpixman ($LIBPIXMAN_PACKAGE_ETAG)"
+  cp -a $LIBPIXMAN_CACHE $VENDORED_LIBPIXMAN
+else
+  echo "-----> Fetching and caching libpixman ($LIBPIXMAN_PACKAGE_ETAG)"
+  mkdir -p $VENDORED_LIBPIXMAN
+  curl $LIBPIXMAN_PACKAGE -o - | tar xjf - -C $VENDORED_LIBPIXMAN
+  mkdir -p $CACHE_DIR
+  cp -a $VENDORED_LIBPIXMAN $LIBPIXMAN_CACHE
+fi
+
+cd $VENDORED_LIBPIXMAN/$LIBPIXMAN_DIRNAME
 CFLAGS='-fPIC -Wall -g -O2' CXXFLAGS='-fPIC -Wall -g -O2' png_CFLAGS='-fPIC -Wall -g -O2' ./configure --prefix=$VENDORED_LIBPIXMAN --with-pic --enable-static --disable-shared
 make -j5
 make install
-export LD_RUN_PATH="$VENDORED_LIBPIXMAN/lib:/usr/local/lib:/usr/lib:/lib:$LD_RUN_PATH"
+cd ..
+rm -fr $LIBPIXMAN_DIRNAME
+export LD_RUN_PATH="$VENDORED_LIBPIXMAN/lib:$LD_RUN_PATH"
 export LD_LIBRARY_PATH="$LD_RUN_PATH"
-export PKG_CONFIG_PATH="$VENDORED_LIBPIXMAN/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PKG_CONFIG_PATH="$VENDORED_LIBPIXMAN/lib/pkgconfig:$PKG_CONFIG_PATH"
 ### End libpixman stuff
 
 #Building libcairo
@@ -55,13 +68,30 @@ else
     VENDORED_LIBCAIRO="/app/vendor/libcairo"
 fi
 
+# fetch and cache the source tar ball
+LIBCAIRO_PACKAGE="http://ftp.ucsb.edu/pub/mirrors/linux/gentoo/distfiles/cairo-1.12.16.tar.xz"
+LIBCAIRO_PACKAGE_ETAG=$(curl -s --head "$LIBCAIRO_PACKAGE" | grep -Ei '^etag' | sed -r 's/^etag|[^a-zA-Z0-9]+//gi')
+LIBCAIRO_CACHE="$CACHE_DIR/libcairo_$LIBCAIRO_PACKAGE_ETAG"
+LIBCAIRO_DIRNAME="cairo-1.12.16"
+
+if [ -d "$LIBCAIRO_CACHE" ]; then
+  echo "-----> Reusing cached libCairo ($LIBCAIRO_PACKAGE_ETAG)"
+  cp -a $LIBCAIRO_CACHE $VENDORED_LIBCAIRO
+else
+  echo "-----> Fetching and caching libCairo ($LIBCAIRO_PACKAGE_ETAG)"
+  mkdir -p $VENDORED_LIBCAIRO
+  curl $LIBCAIRO_PACKAGE -o - | tar xJf - -C $VENDORED_LIBCAIRO
+  mkdir -p $CACHE_DIR
+  cp -a $VENDORED_LIBCAIRO $LIBCAIRO_CACHE
+fi
+
 echo "-----> Building libcairo ... BUILD_DIR: $BUILD_DIR // CACHE_DIR: $CACHE_DIR // PWD: $PWD"
-cd $BUILD_DIR
-git clone git://anongit.freedesktop.org/git/cairo
-cd cairo
+cd $VENDORED_LIBCAIRO/$LIBCAIRO_DIRNAME
 CFLAGS='-fPIC -Wall -g -O2' CXXFLAGS='-fPIC -Wall -g -O2' png_CFLAGS='-fPIC -Wall -g -O2' ./autogen.sh --with-pic --enable-static --disable-shared --prefix=$VENDORED_LIBCAIRO
 make -j5
 make install
+cd ..
+rm -fr $LIBCAIRO_DIRNAME
 export PATH="$VENDORED_LIBCAIRO/bin:$PATH"
 export LD_RUN_PATH="$VENDORED_LIBCAIRO/lib:$LD_RUN_PATH"
 export LD_LIBRARY_PATH="$LD_RUN_PATH"
